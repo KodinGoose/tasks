@@ -1,5 +1,5 @@
-./composer.json
-./secret.key
-./composer.lock
-./vendor
-./config.php
+composer.json
+secret.key
+composer.lock
+vendor
+config.php

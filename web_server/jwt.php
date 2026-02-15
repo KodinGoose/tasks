@@ -1,7 +1,10 @@
 <?php
+
 declare(strict_types=1);
+
 namespace JWT;
 
+use DateTimeImmutable;
 use Lcobucci\Clock\SystemClock;
 use Lcobucci\JWT\Encoding\CannotDecodeContent;
 use Lcobucci\JWT\Encoding\ChainedFormatter;
@@ -21,7 +24,12 @@ use Lcobucci\JWT\Validation\Constraint\PermittedFor;
 use Lcobucci\JWT\Validation\Constraint\RelatedTo;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
 use Lcobucci\JWT\Validation\Constraint\StrictValidAt;
+use Lcobucci\JWT\Validation\Validator;
 use Ramsey\Uuid\Uuid;
+
+use function Error\logError;
+
+require_once 'error.php';
 
 class JWT
 {
@@ -116,7 +124,7 @@ class JWT
 
     public function validateRefreshToken(UnencryptedToken $token): bool
     {
-        $validator = new Lcobucci\JWT\Validation\Validator();
+        $validator = new Validator();
 
         if ($validator->validate($token, new IssuedBy("https://tasks.website")) === false) return false;
         if ($validator->validate($token, new PermittedFor("https://tasks.website")) === false) return false;
@@ -130,7 +138,7 @@ class JWT
 
     public function validateAccessToken(UnencryptedToken $token): bool
     {
-        $validator = new Lcobucci\JWT\Validation\Validator();
+        $validator = new Validator();
 
         if ($validator->validate($token, new IssuedBy("https://tasks.website")) === false) return false;
         if ($validator->validate($token, new PermittedFor("https://tasks.website")) === false) return false;

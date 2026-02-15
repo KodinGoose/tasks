@@ -1,5 +1,1 @@
-composer.json
-secret.key
-composer.lock
-vendor
-config.php
+config_cache

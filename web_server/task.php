@@ -6,6 +6,8 @@ namespace Task;
 
 use DB\DB;
 
+require_once 'db.php';
+
 class Task
 {
     public int $id;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace error;
+namespace Error;
 
 use DateTimeImmutable;
 use DateTimeZone;

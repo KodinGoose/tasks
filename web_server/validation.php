@@ -10,6 +10,10 @@ use Lcobucci\JWT\Token\RegisteredClaims;
 use Lcobucci\JWT\UnencryptedToken;
 use User\User;
 
+require_once 'db.php';
+require_once 'user.php';
+require_once 'jwt.php';
+
 class Validator
 {
     /**

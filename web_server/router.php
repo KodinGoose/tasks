@@ -1,11 +1,13 @@
 <?php
+
 declare(strict_types=1);
+
 namespace router;
 
 use Controller\Controller;
 
 require 'vendor/autoload.php';
-require 'controller.php';
+require_once 'controller.php';
 
 class PathIterator
 {
@@ -32,6 +34,7 @@ class PathIterator
 function endpointNotFound(): void
 {
     http_response_code(404);
+    header("Content-Type: text/plain");
     echo "Endpoint not found";
 }
 

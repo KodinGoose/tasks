@@ -12,8 +12,11 @@ use Task\Task;
 use User\User;
 use Validation\Validator;
 
-require 'validation.php';
-require 'db.php';
+require_once 'db.php';
+require_once 'jwt.php';
+require_once 'task.php';
+require_once 'user.php';
+require_once 'validation.php';
 
 class Controller
 {
@@ -329,18 +332,22 @@ function result(Result $result): void
             break;
         case Result::bad_request:
             http_response_code(400);
+            header("Content-Type: text/plain");
             echo "Bad request";
             break;
         case Result::unauthorised:
             http_response_code(403);
+            header("Content-Type: text/plain");
             echo "Unauthorised";
             break;
         case Result::unexpected_error:
             http_response_code(500);
+            header("Content-Type: text/plain");
             echo "Unexpected error";
             break;
         default:
             http_response_code(500);
+            header("Content-Type: text/plain");
             echo "Unexpected error";
             break;
     }

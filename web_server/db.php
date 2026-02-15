@@ -10,7 +10,10 @@ use Exception;
 use mysqli;
 use mysqli_result;
 
-include "error.php";
+use function error\logError;
+
+require_once "error.php";
+require_once "config.php";
 
 class DB
 {

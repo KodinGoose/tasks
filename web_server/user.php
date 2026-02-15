@@ -6,6 +6,8 @@ namespace User;
 
 use DB\DB;
 
+require_once 'db.php';
+
 class User
 {
     public static function modifyPasswordDB(DB $db, int $uid, string $password_hash): true|null

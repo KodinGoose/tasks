@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+namespace JWT;
 
 use Lcobucci\Clock\SystemClock;
 use Lcobucci\JWT\Encoding\CannotDecodeContent;

@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+namespace error;
+
+use DateTimeImmutable;
+use DateTimeZone;
+
 function logError(string $msg): void
 {
     $time = (new DateTimeImmutable("now", (new DateTimeZone("UTC"))))->format("Y-m-d H:i:s p");

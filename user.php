@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+namespace User;
+
+use DB\DB;
+
 class User
 {
     public static function modifyPasswordDB(DB $db, int $uid, string $password_hash): true|null

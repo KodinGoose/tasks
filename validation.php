@@ -2,9 +2,13 @@
 
 declare(strict_types=1);
 
-use Lcobucci\JWT\JwtFacade;
+namespace Validation;
+
+use DB\DB;
+use JWT\JWT;
 use Lcobucci\JWT\Token\RegisteredClaims;
 use Lcobucci\JWT\UnencryptedToken;
+use User\User;
 
 class Validator
 {

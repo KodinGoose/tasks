@@ -2,7 +2,18 @@
 
 declare(strict_types=1);
 
+namespace Controller;
+
+use DateTimeImmutable;
+use DB\DB;
+use JWT\JWT;
 use Lcobucci\JWT\Token\RegisteredClaims;
+use Task\Task;
+use User\User;
+use Validation\Validator;
+
+require 'validation.php';
+require 'db.php';
 
 class Controller
 {

@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+namespace Task;
+
+use DB\DB;
+
 class Task
 {
     public int $id;

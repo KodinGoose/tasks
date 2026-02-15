@@ -1,8 +1,11 @@
 <?php
-
 declare(strict_types=1);
+namespace router;
+
+use Controller\Controller;
 
 require 'vendor/autoload.php';
+require 'controller.php';
 
 class PathIterator
 {
@@ -35,6 +38,20 @@ function endpointNotFound(): void
 $controller = new Controller();
 $path = new PathIterator();
 switch ($path->next()) {
+    case "":
+        if ($_SERVER["REQUEST_METHOD"] !== "GET") {
+            http_response_code(405);
+            break;
+        }
+        header('Location: resource/index.html', true, 308);
+        break;
+    case "resource":
+        if ($_SERVER["REQUEST_METHOD"] !== "GET") {
+            http_response_code(405);
+            break;
+        }
+        return false;
+        break;
     case "tasks":
         switch ($path->next()) {
             case "tasks":

@@ -24,7 +24,7 @@ class Task
     public function modifyDB(DB $db, int $uid): true|null {
         return $db->logError($db->connection->execute_query(
             'UPDATE tasks SET title = ?, done = ? WHERE id = ? AND uid = ?',
-            array($this->title, $this->done, $this->id, $uid)
+            array($this->title, (int) $this->done, $this->id, $uid)
         ));
     }
 
@@ -37,7 +37,7 @@ class Task
 
         $tasks = array();
         foreach ($data as $row) {
-            $tasks = new Task($row[0], $row[1], $row[2]);
+            array_push($tasks, new Task($row[0], $row[1], $row[2] === 1));
         }
         return $tasks;
     }
@@ -58,8 +58,8 @@ class Task
 
     public static function taskOwnedByUser(DB $db, int $uid, int $id): bool|null {
         return ($ret = $db->logError($db->connection->execute_query(
-            'SELECT EXISTS (SELECT * FROM task WHERE id = ? AND uid = ?)',
+            'SELECT EXISTS (SELECT * FROM tasks WHERE id = ? AND uid = ?)',
             array($id, $uid)
-        ))) === null ? null : $ret[0][0];
+        ))) === null ? null : $ret[0][0] === 1;
     }
 }

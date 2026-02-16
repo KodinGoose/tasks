@@ -1,4 +1,31 @@
-<div>Logged in</div>
-<div><button onclick="logout()">Logout</button></div>
-<div><button onclick='document.cookie="State=changing_password";refreshPage()'>Modify password</button></div>
-<div><button onclick='document.cookie="State=delete_profile";refreshPage()'>Delete profile</button></div>
+<div id="tasks">
+  <table id=profile_table>
+    <tr>
+      <td>
+        <button onclick="logout()">Logout</button>
+      </td>
+      <td>
+        <button onclick='document.cookie="State=changing_password";refreshPage()'>Modify
+          password</button>
+      </td>
+      <td>
+        <button onclick='document.cookie="State=delete_profile";refreshPage()'>Delete
+          profile</button>
+      </td>
+    </tr>
+  </table>
+  <table id="new_task_table">
+    <tr>
+      <td>
+        <button onclick="newTask()">New task</button>
+      </td>
+      <td>
+        <input id="new_task_title" type="text" placeholder="Enter task title here">
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" id="new_task_title_error" hidden></td>
+    </tr>
+  </table>
+  <table id="your_shit"></table>
+</div>

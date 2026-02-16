@@ -22,7 +22,7 @@ class Validator
      */
     public static function integer(mixed $number): int|null
     {
-        if (isset($number) === false or is_int($number)) return null;
+        if (isset($number) === false or is_int($number) === false) return null;
         return $number;
     }
 
@@ -32,7 +32,7 @@ class Validator
      */
     public static function bool(mixed $bool): bool|null
     {
-        if (isset($bool) === false or is_bool($bool)) return null;
+        if (isset($bool) === false or is_bool($bool) === false) return null;
         return $bool;
     }
 

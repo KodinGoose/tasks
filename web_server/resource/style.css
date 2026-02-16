@@ -19,6 +19,64 @@ body {
   /* border-style: dashed; */
   /* } */
 
+  #tasks {
+
+    #profile_table {
+      width: fit-content;
+      margin: auto;
+
+      button {
+        width: 20vw;
+        margin-top: 2vh;
+        padding-top: 1vh;
+        padding-bottom: 1vh;
+        margin-left: 0.5vw;
+        margin-right: 0.5vw;
+      }
+    }
+
+    #new_task_table {
+      width: fit-content;
+      margin: auto;
+      margin-top: 3vh;
+
+      input,
+      button {
+        padding-top: 1vh;
+        padding-bottom: 1vh;
+      }
+
+      button {
+        width: 10vw;
+      }
+
+      input {
+        width: 60vw
+      }
+    }
+
+    #your_shit {
+      width: fit-content;
+      margin: auto;
+      margin-top: 3vh;
+
+      input,
+      button {
+        padding-top: 1vh;
+        padding-bottom: 1vh;
+      }
+
+      .checkbox {
+        width: 28px;
+        height: 28px;
+      }
+
+      .title {
+        width: 60vw;
+      }
+    }
+  }
+
   #login_register_table {
     width: 80%;
     margin: auto;
@@ -37,11 +95,10 @@ body {
     }
 
     button {
+      width: 15vw;
       margin-top: 2vh;
       padding-top: 1vh;
       padding-bottom: 1vh;
-      padding-left: 3vw;
-      padding-right: 3vw;
     }
   }
 }

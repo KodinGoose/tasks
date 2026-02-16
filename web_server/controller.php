@@ -324,6 +324,7 @@ class Controller
         $title = Validator::string(@$data->title, 255, 1);
         if ($title === null) return result(Result::bad_request);
         $done = Validator::bool(@$data->done);
+        if ($done === null) return result(Result::bad_request);
 
         $ret = Task::taskOwnedByUser($db, $token->claims()->get("uid"), $id);
         if ($ret === null) return result(Result::unexpected_error);
@@ -331,7 +332,7 @@ class Controller
         $ret = (new Task($id, $title, $done))->modifyDB($db, $token->claims()->get("uid"));
         if ($ret === null) return result(Result::unexpected_error);
 
-        return result(Result::success);
+        return result(Result::success_no_content);
     }
 
     public function delTask(): null

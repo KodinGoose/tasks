@@ -58,7 +58,7 @@ switch ($path->next()) {
         break;
     case "tasks":
         switch ($path->next()) {
-            case "tasks":
+            case "all":
                 if ($_SERVER["REQUEST_METHOD"] !== "GET") {
                     http_response_code(405);
                     break;

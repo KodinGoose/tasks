@@ -37,6 +37,7 @@ async function refreshPage() {
   } else if (state === "logged_in") {
     response = await fetch(host + "/resource/tasks.html");
     document.getElementById("page_content").innerHTML = await response.text();
+    loadTasks();
   } else if (state === "changing_password") {
     response = await fetch(host + "/resource/change_pass.html");
     document.getElementById("page_content").innerHTML = await response.text();
@@ -259,5 +260,83 @@ async function modPassword() {
 
   clearInterval(access_token_interval);
   document.cookie = "State=logged_out";
+  refreshPage();
+}
+
+async function newTask() {
+  let title = validateString("new_task_title", 255, 1);
+  if (title === false) {
+    document.getElementById("new_task_title_error").innerHTML = "Title cannot be empty and cannot be longer than 255 characters";
+    document.getElementById("new_task_title_error").hidden = false;
+    return;
+  } else {
+    document.getElementById("new_task_title_error").innerHTML = "";
+    document.getElementById("new_task_title_error").hidden = true;
+  }
+
+  response = await fetch(host + "/tasks/new", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ title: title }),
+  });
+
+  if (response.status !== 201) {
+    alert(await (response.text()));
+  } else {
+    refreshPage();
+  }
+}
+
+async function loadTasks() {
+  let response = await fetch(host + "/tasks/all");
+  if (response.status !== 200) {
+    alert("Couldn't load your shit");
+    return;
+  }
+  let tasks = await response.json();
+
+  for (let i = 0; i < tasks.length; i++) {
+    let str = "<tr><td>";
+    str += "<input id=\"task_" + tasks[i].id + "_checkbox\" class=\"checkbox\" type=\"checkbox\" value=\"" + tasks[i].done + "\" onclick=\"modTask(" + tasks[i].id + ")\">"
+    str += "</td><td>";
+    str += "<input id=\"task_" + tasks[i].id + "_title\" class=\"title\" type=\"text\" value=\"" + tasks[i].title + "\"onfocusout=\"modTask(" + tasks[i].id + ")\">"
+    str += "</td><td>";
+    str += "<button class=\"delete_button\" onclick=\"delTask(" + tasks[i].id + ")\">Delete task</button>"
+    str += "</td></tr>";
+    document.getElementById("your_shit").innerHTML += str;
+  }
+}
+
+async function modTask(id) {
+  let done = document.getElementById("task_" + id + "_checkbox").checked;
+  let title = document.getElementById("task_" + id + "_title").value;
+  response = await fetch(host + "/tasks/mod", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ id: id, done: done, title: title }),
+  });
+  if (response.status !== 204) {
+    alert(await response.text());
+    return;
+  }
+}
+
+async function delTask(id) {
+  response = await fetch(host + "/tasks/del", {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ id: id }),
+  });
+  if (response.status !== 200) {
+    alert(await response.text());
+    return;
+  }
+
   refreshPage();
 }

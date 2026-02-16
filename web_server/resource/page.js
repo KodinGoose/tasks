@@ -1,26 +1,47 @@
-let logged_in = false;
 let access_token_interval;
 let host = window.location.protocol + "//" + window.location.host;
+
+function getCookie(cookieName) {
+  const cookies = document.cookie.split('; ');
+  for (const cookie of cookies) {
+    const [name, value] = cookie.split('=');
+    if (name === cookieName) {
+      return decodeURIComponent(value);
+    }
+  }
+  return null;
+}
 
 async function loadPage() {
   let response = await fetch(host + "/user/refresh/refresh_token");
   if (response.status === 200) {
     response = await fetch(host + "/user/refresh/access_token");
     if (response.status === 200) {
-      logged_in = true;
+      if (getCookie("State") === "logged_out" || getCookie("State") === null) {
+        document.cookie = "State=logged_in";
+      }
     }
     access_token_interval = setInterval(function() { refreshAccessToken(); }, 60000);
+  } else {
+    document.cookie = "State=logged_out";
   }
 
   refreshPage();
 }
 
 async function refreshPage() {
-  if (logged_in === false) {
+  let state = getCookie("State");
+  if (state === "logged_out" || state === null) {
     response = await fetch(host + "/resource/login.html");
     document.getElementById("page_content").innerHTML = await response.text();
-  } else {
+  } else if (state === "logged_in") {
     response = await fetch(host + "/resource/tasks.html");
+    document.getElementById("page_content").innerHTML = await response.text();
+  } else if (state === "changing_password") {
+    response = await fetch(host + "/resource/change_pass.html");
+    document.getElementById("page_content").innerHTML = await response.text();
+  } else if (state === "delete_profile") {
+    response = await fetch(host + "/resource/delete_profile.html");
     document.getElementById("page_content").innerHTML = await response.text();
   }
 }
@@ -67,7 +88,7 @@ async function login() {
     }
   }
 
-  logged_in = true;
+  document.cookie = "State=logged_in";
 
   access_token_interval = setInterval(function() { refreshAccessToken(); }, 60000);
 
@@ -147,24 +168,22 @@ function validatePassword(id) {
 
 async function refreshAccessToken() {
   response = await fetch(host + "/user/refresh/access_token");
-  if (response.status === 200) {
-    logged_in = true;
-  }
 }
 
 async function logout() {
   clearInterval(access_token_interval);
   response = await fetch(host + "/user/logout");
   if (response.status === 204) {
-    logged_in = false;
+    clearInterval(access_token_interval);
+    document.cookie = "State=logged_out";
+    refreshPage();
   } else {
     alert(await response.text());
+    return;
   }
-
-  refreshPage();
 }
 
-async function del () {
+async function del() {
   let password = validatePassword("delete_password");
   if (password === false) {
     document.getElementById("delete_password_error").innerHTML = "Password length must be at least 12 characters and cannot be longer than 255 characters";
@@ -175,7 +194,6 @@ async function del () {
     document.getElementById("delete_password_error").hidden = true;
   }
 
-  clearInterval(access_token_interval);
   response = await fetch(host + "/user/delete", {
     method: "DELETE",
     headers: {
@@ -184,10 +202,62 @@ async function del () {
     body: JSON.stringify({ password: password }),
   });
   if (response.status === 204) {
-    logged_in = false;
+    document.cookie = "State=logged_out";
   } else {
-    alert(await response.text());
+    res_body = await response.text();
+    if (response.status === 403 && res_body === "Unauthorised") {
+      alert("Incorrect username or password");
+    } else {
+      alert(res_body);
+    }
+    return;
   }
 
+  clearInterval(access_token_interval);
+  refreshPage();
+}
+
+async function modPassword() {
+  let old_password = validatePassword("mod_old_password");
+  let new_password = validatePassword("mod_new_password");
+  let errored = false;
+  if (old_password === false) {
+    document.getElementById("mod_old_password_error").innerHTML = "Password length must be at least 12 characters and cannot be longer than 255 characters";
+    document.getElementById("mod_old_password_error").hidden = false;
+    errored = true;
+  } else {
+    document.getElementById("mod_old_password_error").innerHTML = "";
+    document.getElementById("mod_old_password_error").hidden = true;
+  }
+  if (new_password === false) {
+    document.getElementById("mod_new_password_error").innerHTML = "Password length must be at least 12 characters and cannot be longer than 255 characters";
+    document.getElementById("mod_new_password_error").hidden = false;
+    errored = true;
+  } else {
+    document.getElementById("mod_new_password_error").innerHTML = "";
+    document.getElementById("mod_new_password_error").hidden = true;
+  }
+  if (errored === true) return;
+
+  response = await fetch(host + "/user/mod_password", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ old_password: old_password, password: new_password }),
+  });
+  if (response.status !== 204) {
+    res_body = await response.text();
+    if (response.status === 403 && res_body === "Unauthorised") {
+      alert("Incorrect username or password");
+    } else {
+      alert(res_body);
+    }
+    return;
+  }
+
+
+  clearInterval(access_token_interval);
+  document.cookie = "State=logged_out";
   refreshPage();
 }

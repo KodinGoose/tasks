@@ -136,6 +136,8 @@ class Controller
         $jwt = JWT::init();
         if ($jwt === false) return result(Result::unexpected_error);
         $token = Validator::getAccessToken($db, $jwt);
+        if ($token === null) return result(Result::unexpected_error);
+        if ($token === false) return result(Result::unauthorised);
         $data = json_decode(file_get_contents("php://input"));
         $old_password = Validator::string(@$data->old_password, 255, 12);
         if ($old_password === null) return result(Result::bad_request);
@@ -172,7 +174,7 @@ class Controller
         );
         setcookie('AccessToken', "", $arr_cookie_options);
 
-        return result(Result::success);
+        return result(Result::success_no_content);
     }
 
     public function deleteUser(): null

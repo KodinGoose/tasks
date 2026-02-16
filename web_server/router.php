@@ -48,6 +48,14 @@ switch ($path->next()) {
         }
         header('Location: resource/index.html', true, 308);
         break;
+    // This is useless when used with nginx but required for php's built in web server
+    case "resource":
+        if ($_SERVER["REQUEST_METHOD"] !== "GET") {
+            http_response_code(405);
+            break;
+        }
+        return false;
+        break;
     case "tasks":
         switch ($path->next()) {
             case "tasks":

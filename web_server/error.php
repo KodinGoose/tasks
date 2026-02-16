@@ -6,13 +6,13 @@ namespace Error;
 
 use DateTimeImmutable;
 use DateTimeZone;
+use DB\DB;
 
-function logError(string $msg): void
+function logError(DB $db, string $msg): void
 {
-    $time = (new DateTimeImmutable("now", (new DateTimeZone("UTC"))))->format("Y-m-d H:i:s p");
-    if (file_put_contents("error_logs.txt", $time . ": " . $msg . "\n") === false) {
-        $stdout = fopen('php://stdout', 'w');
-        fwrite($stdout, "Failed to open \"error_logs.txt\" file\n");
-        fclose($stdout);
-    };
+    $time = (new DateTimeImmutable("now", (new DateTimeZone("UTC"))))->format("Y-m-d H:i:s");
+    $db->connection->execute_query(
+        'INSERT INTO error_logs (time_, message) VALUE (?, ?)',
+        array($time, $msg)
+    );
 }

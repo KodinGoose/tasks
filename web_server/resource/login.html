@@ -2,43 +2,26 @@
   <tr>
 
     <td>
-      <table>
-        <tr>
-          <td class="login_register_info">Username</td>
-          <td>
-            <input id="login_username" type="text">
-          </td>
-        </tr>
-        <tr>
-          <td class="login_register_info">Password</td>
-          <td>
-            <input id="login_password" type="password">
-          </td>
-        </tr>
-      </table>
+      <div class="login_register_info">Username</div>
+      <div><input id="login_username" type="text"></div>
+      <div id="login_username_error" class="error" hidden></div>
+      <div class="login_register_info">Password</div>
+      <div><input id="login_password" type="password"></div>
+      <div id="login_password_error" class="error" hidden></div>
+      <div><button onclick="login()">Login</button></div>
     </td>
 
     <td>
-      <table>
-        <tr>
-          <td class="login_register_info">Username</td>
-          <td>
-            <input id="register_username" type="text">
-          </td>
-        </tr>
-        <tr>
-          <td class="login_register_info">Password</td>
-          <td>
-            <input id="register_password" type="password">
-          </td>
-        </tr>
-        <tr>
-          <td class="login_register_info">Repeat your password</td>
-          <td>
-            <input id="register_password_repeated" type="password">
-          </td>
-        </tr>
-      </table>
+      <div class="login_register_info">Username</div>
+      <div><input id="register_username" type="text"></div>
+      <div id="register_username_error" class="error" hidden></div>
+      <div class="login_register_info">Password</div>
+      <div><input id="register_password" type="password"></div>
+      <div id="register_password_error" class="error" hidden></div>
+      <div class="login_register_info">Repeat your password</div>
+      <div><input id="register_repeat_password" type="password"></div>
+      <div id="register_repeat_password_error" class="error" hidden></div>
+      <div><button onclick="register()">Register</button></div>
     </td>
 
   </tr>

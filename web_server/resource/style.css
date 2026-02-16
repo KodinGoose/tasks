@@ -2,19 +2,46 @@ body {
   background-color: #202028;
   color: #e0e0e0;
   font-family: Arial, Helvetica, sans-serif;
-  font-size: 32px;
+  font-size: 28px;
+  text-align: center;
 
-  input {
+  input,
+  button {
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 32px;
+    font-size: 28px;
   }
 
+  /* table, */
+  /* tr, */
+  /* td { */
+  /* border-color: #e0e0e0; */
+  /* border-width: 2px; */
+  /* border-style: dashed; */
+  /* } */
+
   #login_register_table {
-    width: 100%;
-    border: 2px solid black;
+    width: 80%;
+    margin: auto;
+    margin-top: 20vh;
+
+    td {
+      width: 50%;
+    }
 
     .login_register_info {
-      text-align: right;
+      margin-top: 1vh;
+    }
+
+    .error {
+      font-size: 20px;
+    }
+
+    button {
+      margin-top: 2vh;
+      padding-top: 1vh;
+      padding-bottom: 1vh;
+      padding-left: 3vw;
+      padding-right: 3vw;
     }
   }
 }

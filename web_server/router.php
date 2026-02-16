@@ -48,13 +48,6 @@ switch ($path->next()) {
         }
         header('Location: resource/index.html', true, 308);
         break;
-    case "resource":
-        if ($_SERVER["REQUEST_METHOD"] !== "GET") {
-            http_response_code(405);
-            break;
-        }
-        return false;
-        break;
     case "tasks":
         switch ($path->next()) {
             case "tasks":
@@ -98,6 +91,13 @@ switch ($path->next()) {
                     break;
                 }
                 $controller->login();
+                break;
+            case "logout":
+                if ($_SERVER["REQUEST_METHOD"] !== "GET") {
+                    http_response_code(405);
+                    break;
+                }
+                $controller->logout();
                 break;
             case "register":
                 if ($_SERVER["REQUEST_METHOD"] !== "POST") {

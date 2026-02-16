@@ -30,3 +30,9 @@ CREATE OR REPLACE EVENT refresh_token_cleanup
   ON SCHEDULE EVERY 5 MINUTE DO
     DELETE FROM refresh_tokens
     WHERE TO_SECONDS(delete_after) < TO_SECONDS(NOW());
+
+CREATE OR REPLACE TABLE error_logs (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    time_ DATETIME NOT NULL,
+    message TEXT NOT NULL
+);

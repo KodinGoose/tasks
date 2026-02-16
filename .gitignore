@@ -1,1 +1,7 @@
-config_cache
+tasks.pem
+tasks.key
+web_server/composer.json
+web_server/secret.key
+web_server/composer.lock
+web_server/vendor
+web_server/config.php

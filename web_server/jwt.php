@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace JWT;
 
 use DateTimeImmutable;
+use DateTimeZone;
+use DB\DB;
 use Lcobucci\Clock\SystemClock;
 use Lcobucci\JWT\Encoding\CannotDecodeContent;
 use Lcobucci\JWT\Encoding\ChainedFormatter;
@@ -47,7 +49,9 @@ class JWT
         try {
             $jwt = new JWT(new Blake2b(), InMemory::file("secret.key"));
         } catch (FileCouldNotBeRead) {
-            logError("Failed to read secret. Does secret.key exist?");
+            $db = DB::init();
+            if ($db === null) return false;
+            logError($db, "Failed to read secret. Does secret.key exist?");
             return false;
         }
         return $jwt;
@@ -56,14 +60,14 @@ class JWT
     public function issueRefreshToken(int $uid): UnencryptedToken
     {
         $tokenBuilder = Builder::new(new JoseEncoder(), ChainedFormatter::default());
-        $now   = new DateTimeImmutable();
+        $now   = new DateTimeImmutable("now", (new DateTimeZone("UTC")));
         $token = $tokenBuilder
             // Configures the issuer (iss claim)
             ->issuedBy('https://tasks.website')
             // Configures the audience (aud claim)
             ->permittedFor('https://tasks.website')
             // Configures the subject of the token (sub claim)
-            ->relatedTo('Session')
+            ->relatedTo('Refresh')
             // Configures the id (jti claim)
             ->identifiedBy(Uuid::uuid4()->toString())
             // Configures the time that the token was issue (iat claim)
@@ -85,7 +89,7 @@ class JWT
     public function issueAccessToken(int $uid): UnencryptedToken
     {
         $tokenBuilder = Builder::new(new JoseEncoder(), ChainedFormatter::default());
-        $now   = new DateTimeImmutable();
+        $now   = new DateTimeImmutable("now", (new DateTimeZone("UTC")));
         $token = $tokenBuilder
             // Configures the issuer (iss claim)
             ->issuedBy('https://tasks.website')

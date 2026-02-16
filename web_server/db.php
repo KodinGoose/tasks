@@ -29,12 +29,10 @@ class DB
         try {
             $connection = mysqli_connect(Config::$database_hostname, Config::$database_username, Config::$database_password, Config::$database_name);
             if ($connection === false) {
-                logError(mysqli_connect_error());
                 return null;
             }
             return new DB($connection);
         } catch (Exception) {
-            logError(mysqli_connect_error());
             return null;
         }
     }
@@ -42,7 +40,7 @@ class DB
     public function logError(mysqli_result|bool $result): array|true|null
     {
         if ($result === false) {
-            logError($this->connection->error);
+            logError($this, $this->connection->error);
             return null;
         }
         if ($result === true) return true;
@@ -65,7 +63,7 @@ class DB
         ));
     }
 
-    public function revokeRefreshToken(int $uid, int $token_id): true|null
+    public function revokeRefreshToken(int $uid, string $token_id): true|null
     {
         return $this->logError($this->connection->execute_query(
             'UPDATE refresh_tokens SET revoked = TRUE WHERE uid = ? AND token_id = ?',
@@ -77,7 +75,7 @@ class DB
     {
         return $this->logError($this->connection->execute_query(
             'INSERT INTO refresh_tokens (uid, token_id, delete_after) VALUE (?, ?, ?)',
-            array($uid, $token_id, $delete_after)
+            array($uid, $token_id, $delete_after->format("Y-m-d H:i:s"))
         ));
     }
 }

@@ -43,25 +43,25 @@ class User
     public static function deleteDB(DB $db, int $uid): true|null
     {
         return $db->logError($db->connection->execute_query(
-            'DELETE FROM tasks WHERE id = ?',
+            'DELETE FROM users WHERE id = ?',
             array($uid)
         ));
     }
 
     public static function existsDB(DB $db, int $uid): bool|null
     {
-        return $db->logError($db->connection->execute_query(
+        return ($ret = $db->logError($db->connection->execute_query(
             'SELECT EXISTS (SELECT * FROM users WHERE id = ?)',
             array($uid)
-        ));
+        ))) === null ? null : $ret[0][0] === 1;
     }
 
     public static function existsViaUsernameDB(DB $db, string $username): bool|null
     {
-        return $db->logError($db->connection->execute_query(
+        return ($ret = $db->logError($db->connection->execute_query(
             'SELECT EXISTS (SELECT * FROM users WHERE username = ?)',
             array($username)
-        ));
+        ))) === null ? null : $ret[0][0] === 1;
     }
 
     public static function getPasswordHashDB(DB $db, int $uid): string|null

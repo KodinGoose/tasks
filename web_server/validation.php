@@ -48,7 +48,7 @@ class Validator
     }
 
     public static function getRefreshToken(DB $db, JWT $jwt): UnencryptedToken|false|null {
-        if (isset($_COOKIE["RefreshToken"]) === false or is_string("RefreshToken") === false) return false;
+        if (isset($_COOKIE["RefreshToken"]) === false or is_string($_COOKIE["RefreshToken"]) === false) return false;
         $token = $jwt->parseToken($_COOKIE["RefreshToken"]);
         if ($token === false) return false;
         if ($jwt->validateRefreshToken($token) === false) return false;

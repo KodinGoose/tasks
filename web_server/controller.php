@@ -48,29 +48,42 @@ class Controller
         $jwt = JWT::init();
         if ($jwt === false) return result(Result::unexpected_error);
         $refresh_token = $jwt->issueRefreshToken($uid);
-        $ret = $db->newRefreshToken($uid, $refresh_token->claims()->get(RegisteredClaims::ID), new DateTimeImmutable()->modify("+7 day"));
-        if ($ret === null) return result(Result::unexpected_error);
+        if ($db->newToken(
+            $refresh_token->claims()->get("uid"),
+            $refresh_token->claims()->get(RegisteredClaims::ID),
+            $refresh_token->claims()->get(RegisteredClaims::EXPIRATION_TIME)
+        ) === null) return result(Result::unexpected_error);
         $access_token = $jwt->issueAccessToken($uid);
+        if ($db->newToken(
+            $access_token->claims()->get("uid"),
+            $access_token->claims()->get(RegisteredClaims::ID),
+            $access_token->claims()->get(RegisteredClaims::EXPIRATION_TIME)
+        ) === null) return result(Result::unexpected_error);
 
-        $arr_cookie_options = array(
-            'expires' => time() + 60 * 60 * 24 * 7,
-            'path' => '/user/refresh/',
-            'domain' => '',
-            'secure' => php_sapi_name() !== "cli-server",
-            'httponly' => true,
-            'samesite' => 'Strict'
+        $age = $refresh_token->claims()->get(RegisteredClaims::EXPIRATION_TIME)->getTimeStamp() -
+            $refresh_token->claims()->get(RegisteredClaims::ISSUED_AT)->getTimeStamp();
+        header(
+            'Set-Cookie: RefreshToken=' . $refresh_token->toString()
+                . '; Max-Age=' . $age
+                . '; Path=/user/refresh/'
+                . '; Secure'
+                . '; HttpOnly'
+                . '; Partitioned'
+                . '; SameSite=Strict',
+            replace:false
         );
-        setcookie('RefreshToken', $refresh_token->toString(), $arr_cookie_options);
-
-        $arr_cookie_options = array(
-            'expires' => time() + 60 * 5,
-            'path' => '/',
-            'domain' => '',
-            'secure' => php_sapi_name() !== "cli-server",
-            'httponly' => true,
-            'samesite' => 'Strict'
+        $age = $access_token->claims()->get(RegisteredClaims::EXPIRATION_TIME)->getTimeStamp() -
+            $access_token->claims()->get(RegisteredClaims::ISSUED_AT)->getTimeStamp();
+        header(
+            'Set-Cookie: AccessToken=' . $access_token->toString()
+                . '; Max-Age=' . $age
+                . '; Path=/'
+                . '; Secure'
+                . '; HttpOnly'
+                . '; Partitioned'
+                . '; SameSite=Strict',
+            replace:false
         );
-        setcookie('AccessToken', $access_token->toString(), $arr_cookie_options);
 
         return result(Result::success);
     }
@@ -84,27 +97,28 @@ class Controller
         if ($token === null) return result(Result::unexpected_error);
         if ($token === false) return result(Result::unauthorised);
 
-        if ($db->revokeAllRefreshTokens($db, $token->claims()->get("uid")) === null) return result(Result::unexpected_error);
+        if ($db->revokeAllTokens($db, $token->claims()->get("uid")) === null) return result(Result::unexpected_error);
 
-        $arr_cookie_options = array(
-            'expires' => 0,
-            'path' => '/user/refresh/',
-            'domain' => '',
-            'secure' => php_sapi_name() !== "cli-server",
-            'httponly' => true,
-            'samesite' => 'Strict'
+        header(
+            'Set-Cookie: RefreshToken='
+                . '; Max-Age=0'
+                . '; Path=/user/refresh/'
+                . '; Secure'
+                . '; HttpOnly'
+                . '; Partitioned'
+                . '; SameSite=Strict',
+            replace:false
         );
-        setcookie('RefreshToken', "", $arr_cookie_options);
-
-        $arr_cookie_options = array(
-            'expires' => 0,
-            'path' => '/',
-            'domain' => '',
-            'secure' => php_sapi_name() !== "cli-server",
-            'httponly' => true,
-            'samesite' => 'Strict'
+        header(
+            'Set-Cookie: AccessToken='
+                . '; Max-Age=0'
+                . '; Path=/'
+                . '; Secure'
+                . '; HttpOnly'
+                . '; Partitioned'
+                . '; SameSite=Strict',
+            replace:false
         );
-        setcookie('AccessToken', "", $arr_cookie_options);
 
         return result(Result::success_no_content);
     }
@@ -152,27 +166,28 @@ class Controller
         if ($password_hash === false) return result(Result::unexpected_error);
         if (User::modifyPasswordDB($db, $token->claims()->get("uid"), $password_hash) === null) return result(Result::unexpected_error);
 
-        if ($db->revokeAllRefreshTokens($db, $token->claims()->get("uid")) === null) return result(Result::unexpected_error);
+        if ($db->revokeAllTokens($db, $token->claims()->get("uid")) === null) return result(Result::unexpected_error);
 
-        $arr_cookie_options = array(
-            'expires' => 0,
-            'path' => '/user/refresh/',
-            'domain' => '',
-            'secure' => php_sapi_name() !== "cli-server",
-            'httponly' => true,
-            'samesite' => 'Strict'
+        header(
+            'Set-Cookie: RefreshToken='
+                . '; Max-Age=0'
+                . '; Path=/user/refresh/'
+                . '; Secure'
+                . '; HttpOnly'
+                . '; Partitioned'
+                . '; SameSite=Strict',
+            replace:false
         );
-        setcookie('RefreshToken', "", $arr_cookie_options);
-
-        $arr_cookie_options = array(
-            'expires' => 0,
-            'path' => '/',
-            'domain' => '',
-            'secure' => php_sapi_name() !== "cli-server",
-            'httponly' => true,
-            'samesite' => 'Strict'
+        header(
+            'Set-Cookie: AccessToken='
+                . '; Max-Age=0'
+                . '; Path=/'
+                . '; Secure'
+                . '; HttpOnly'
+                . '; Partitioned'
+                . '; SameSite=Strict',
+            replace:false
         );
-        setcookie('AccessToken', "", $arr_cookie_options);
 
         return result(Result::success_no_content);
     }
@@ -196,27 +211,28 @@ class Controller
 
         if (User::deleteDB($db, $token->claims()->get("uid")) === null) return result(Result::unexpected_error);
 
-        if ($db->revokeAllRefreshTokens($db, $token->claims()->get("uid")) === null) return result(Result::unexpected_error);
+        if ($db->revokeAllTokens($db, $token->claims()->get("uid")) === null) return result(Result::unexpected_error);
 
-        $arr_cookie_options = array(
-            'expires' => 0,
-            'path' => '/user/refresh/',
-            'domain' => '',
-            'secure' => php_sapi_name() !== "cli-server",
-            'httponly' => true,
-            'samesite' => 'Strict'
+        header(
+            'Set-Cookie: RefreshToken='
+                . '; Max-Age=0'
+                . '; Path=/user/refresh/'
+                . '; Secure'
+                . '; HttpOnly'
+                . '; Partitioned'
+                . '; SameSite=Strict',
+            replace:false
         );
-        setcookie('RefreshToken', "", $arr_cookie_options);
-
-        $arr_cookie_options = array(
-            'expires' => 0,
-            'path' => '/',
-            'domain' => '',
-            'secure' => php_sapi_name() !== "cli-server",
-            'httponly' => true,
-            'samesite' => 'Strict'
+        header(
+            'Set-Cookie: AccessToken='
+                . '; Max-Age=0'
+                . '; Path=/'
+                . '; Secure'
+                . '; HttpOnly'
+                . '; Partitioned'
+                . '; SameSite=Strict',
+            replace:false
         );
-        setcookie('AccessToken', "", $arr_cookie_options);
 
         return result(Result::success_no_content);
     }
@@ -231,19 +247,26 @@ class Controller
         if ($token === null) return result(Result::unexpected_error);
         if ($token === false) return result(Result::unauthorised);
 
-        $ret = $db->revokeRefreshToken($token->claims()->get("uid"), $token->claims()->get(RegisteredClaims::ID));
-        if ($ret === null) return result(Result::unexpected_error);
+        if ($db->revokeToken($token->claims()->get("uid"), $token->claims()->get(RegisteredClaims::ID)) === null) return result(Result::unexpected_error);
         $new_token = $jwt->issueRefreshToken($token->claims()->get("uid"));
+        if ($db->newToken(
+            $new_token->claims()->get("uid"),
+            $new_token->claims()->get(RegisteredClaims::ID),
+            $new_token->claims()->get(RegisteredClaims::EXPIRATION_TIME)
+        ) === null) return result(Result::unexpected_error);
 
-        $arr_cookie_options = array(
-            'expires' => time() + 60 * 60 * 24 * 7,
-            'path' => '/user/refresh/',
-            'domain' => '',
-            'secure' => php_sapi_name() !== "cli-server",
-            'httponly' => true,
-            'samesite' => 'Strict'
+        $age = $new_token->claims()->get(RegisteredClaims::EXPIRATION_TIME)->getTimeStamp() -
+            $new_token->claims()->get(RegisteredClaims::ISSUED_AT)->getTimeStamp();
+        header(
+            'Set-Cookie: RefreshToken=' . $new_token->toString()
+                . '; Max-Age=' . $age
+                . '; Path=/user/refresh/'
+                . '; Secure'
+                . '; HttpOnly'
+                . '; Partitioned'
+                . '; SameSite=Strict',
+            replace:false
         );
-        setcookie('RefreshToken', $new_token->toString(), $arr_cookie_options);
 
         return result(Result::success);
     }
@@ -259,16 +282,24 @@ class Controller
         if ($token === false) return result(Result::unauthorised);
 
         $new_token = $jwt->issueAccessToken($token->claims()->get("uid"));
+        if ($db->newToken(
+            $new_token->claims()->get("uid"),
+            $new_token->claims()->get(RegisteredClaims::ID),
+            $new_token->claims()->get(RegisteredClaims::EXPIRATION_TIME)
+        ) === null) return result(Result::unexpected_error);
 
-        $arr_cookie_options = array(
-            'expires' => time() + 60 * 5,
-            'path' => '/',
-            'domain' => '',
-            'secure' => php_sapi_name() !== "cli-server",
-            'httponly' => true,
-            'samesite' => 'Strict'
+        $age = $new_token->claims()->get(RegisteredClaims::EXPIRATION_TIME)->getTimeStamp() -
+            $new_token->claims()->get(RegisteredClaims::ISSUED_AT)->getTimeStamp();
+        header(
+            'Set-Cookie: AccessToken=' . $new_token->toString()
+                . '; Max-Age=' . $age
+                . '; Path=/'
+                . '; Secure'
+                . '; HttpOnly'
+                . '; Partitioned'
+                . '; SameSite=Strict',
+            replace:false
         );
-        setcookie('AccessToken', $new_token->toString(), $arr_cookie_options);
 
         return result(Result::success);
     }

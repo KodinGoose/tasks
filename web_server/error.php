@@ -6,13 +6,9 @@ namespace Error;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use DB\DB;
 
-function logError(DB $db, string $msg): void
+function logError(string $msg): void
 {
-    $time = (new DateTimeImmutable("now", (new DateTimeZone("UTC"))))->format("Y-m-d H:i:s");
-    $db->connection->execute_query(
-        'INSERT INTO error_logs (time_, message) VALUE (?, ?)',
-        array($time, $msg)
-    );
+    $time = (new DateTimeImmutable("now", (new DateTimeZone("UTC"))))->format("Y-m-d H:i:s T");
+    file_put_contents("error_logs.txt", $time.': '.$msg."\n", LOCK_EX | FILE_APPEND);
 }

@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace JWT;
 
+use Config\Config;
 use DateTimeImmutable;
 use DateTimeZone;
-use DB\DB;
+use Exception;
 use Lcobucci\Clock\SystemClock;
 use Lcobucci\JWT\Encoding\CannotDecodeContent;
 use Lcobucci\JWT\Encoding\ChainedFormatter;
 use Lcobucci\JWT\Encoding\JoseEncoder;
-use Lcobucci\JWT\Signer;
 use Lcobucci\JWT\Signer\Blake2b;
-use Lcobucci\JWT\Signer\Key\FileCouldNotBeRead;
 use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Token\Builder;
 use Lcobucci\JWT\Token\InvalidTokenStructure;
@@ -35,31 +34,27 @@ require_once 'error.php';
 
 class JWT
 {
-    private $algorithm;
     private $signingKey;
 
-    public function __construct(Signer $signer, InMemory $key)
+    public function __construct(InMemory $key)
     {
-        $this->algorithm = $signer;
         $this->signingKey = $key;
     }
 
     public static function init(): JWT|false
     {
         try {
-            $jwt = new JWT(new Blake2b(), InMemory::file("secret.key"));
-        } catch (FileCouldNotBeRead) {
-            $db = DB::init();
-            if ($db === null) return false;
-            logError($db, "Failed to read secret. Does secret.key exist?");
+            return new JWT(InMemory::plainText(Config::$jwt_secret));
+        } catch (Exception $e) {
+            logError("Failed to initialize JWT Class from Config::\$jwt_secret; Exception: ".$e->getMessage());
             return false;
         }
-        return $jwt;
     }
 
     public function issueRefreshToken(int $uid): UnencryptedToken
     {
         $tokenBuilder = Builder::new(new JoseEncoder(), ChainedFormatter::default());
+        $algorithm = new Blake2b();
         $now   = new DateTimeImmutable("now", (new DateTimeZone("UTC")));
         $token = $tokenBuilder
             // Configures the issuer (iss claim)
@@ -81,7 +76,7 @@ class JWT
             // Configures a new header, called "foo"
             // ->withHeader('foo', 'bar')
             // Builds a new token
-            ->getToken($this->algorithm, $this->signingKey);
+            ->getToken($algorithm, $this->signingKey);
 
         return $token;
     }
@@ -89,6 +84,7 @@ class JWT
     public function issueAccessToken(int $uid): UnencryptedToken
     {
         $tokenBuilder = Builder::new(new JoseEncoder(), ChainedFormatter::default());
+        $algorithm = new Blake2b();
         $now   = new DateTimeImmutable("now", (new DateTimeZone("UTC")));
         $token = $tokenBuilder
             // Configures the issuer (iss claim)
@@ -110,7 +106,7 @@ class JWT
             // Configures a new header, called "foo"
             // ->withHeader('foo', 'bar')
             // Builds a new token
-            ->getToken($this->algorithm, $this->signingKey);
+            ->getToken($algorithm, $this->signingKey);
 
         return $token;
     }
@@ -133,7 +129,7 @@ class JWT
         if ($validator->validate($token, new IssuedBy("https://tasks.website")) === false) return false;
         if ($validator->validate($token, new PermittedFor("https://tasks.website")) === false) return false;
         if ($validator->validate($token, new RelatedTo("Refresh")) === false) return false;
-        if ($validator->validate($token, new SignedWith($this->algorithm, $this->signingKey)) === false) return false;
+        if ($validator->validate($token, new SignedWith(new Blake2b(), $this->signingKey)) === false) return false;
         if ($validator->validate($token, new StrictValidAt(SystemClock::fromUTC())) === false) return false;
         if ($validator->validate($token, new HasClaim("uid")) === false) return false;
 
@@ -147,7 +143,7 @@ class JWT
         if ($validator->validate($token, new IssuedBy("https://tasks.website")) === false) return false;
         if ($validator->validate($token, new PermittedFor("https://tasks.website")) === false) return false;
         if ($validator->validate($token, new RelatedTo("Access")) === false) return false;
-        if ($validator->validate($token, new SignedWith($this->algorithm, $this->signingKey)) === false) return false;
+        if ($validator->validate($token, new SignedWith(new Blake2b(), $this->signingKey)) === false) return false;
         if ($validator->validate($token, new StrictValidAt(SystemClock::fromUTC())) === false) return false;
         if ($validator->validate($token, new HasClaim("uid")) === false) return false;
 

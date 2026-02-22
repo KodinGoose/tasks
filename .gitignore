@@ -1,5 +1,7 @@
 tasks.pem
 tasks.key
+dhparam
+web_server/error_logs.txt
 web_server/composer.json
 web_server/secret.key
 web_server/composer.lock

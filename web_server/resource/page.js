@@ -299,7 +299,7 @@ async function loadTasks() {
 
   for (let i = 0; i < tasks.length; i++) {
     let str = "<tr><td>";
-    str += "<input id=\"task_" + tasks[i].id + "_checkbox\" class=\"checkbox\" type=\"checkbox\" value=\"" + tasks[i].done + "\" onclick=\"modTask(" + tasks[i].id + ")\">"
+    str += "<input id=\"task_" + tasks[i].id + "_checkbox\" class=\"checkbox\" type=\"checkbox\" " + (tasks[i].done === true ? "checked" : "") + " onclick=\"modTask(" + tasks[i].id + ")\">"
     str += "</td><td>";
     str += "<input id=\"task_" + tasks[i].id + "_title\" class=\"title\" type=\"text\" value=\"" + tasks[i].title + "\"onfocusout=\"modTask(" + tasks[i].id + ")\">"
     str += "</td><td>";

@@ -52,7 +52,7 @@ class Validator
         $token = $jwt->parseToken($_COOKIE["RefreshToken"]);
         if ($token === false) return false;
         if ($jwt->validateRefreshToken($token) === false) return false;
-        $ret = $db->isRevokedRefreshToken($token->claims()->get("uid"), $token->claims()->get(RegisteredClaims::ID));
+        $ret = $db->isRevokedToken($token->claims()->get("uid"), $token->claims()->get(RegisteredClaims::ID));
         if ($ret === null) return null;
         if ($ret === true) return false;
         $ret = User::existsDB($db, $token->claims()->get("uid"));
@@ -66,6 +66,9 @@ class Validator
         $token = $jwt->parseToken($_COOKIE["AccessToken"]);
         if ($token === false) return false;
         if ($jwt->validateAccessToken($token) === false) return false;
+        $ret = $db->isRevokedToken($token->claims()->get("uid"), $token->claims()->get(RegisteredClaims::ID));
+        if ($ret === null) return null;
+        if ($ret === true) return false;
         $ret = User::existsDB($db, $token->claims()->get("uid"));
         if ($ret === null) return null;
         if ($ret === false) return false;

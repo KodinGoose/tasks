@@ -6,9 +6,9 @@ x509_extensions = v3_req
 prompt = no
 
 [req_distinguished_name]
-countryName = XX
-stateOrProvinceName = N/A
-localityName = N/A
+countryName = HU
+stateOrProvinceName = Baranya
+localityName = Pécs
 organizationName = Self-signed certificate
 commonName = 127.0.0.1
 
